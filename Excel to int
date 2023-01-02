@@ -33,7 +33,7 @@
       ls_upload_data = lt_upload_data[ 2 ].
       IF ls_upload_data IS NOT INITIAL.
         ls_upload_data-value = to_upper( ls_upload_data-value ).
-        IF ls_upload_data-value EQ text-033. "VENDOR CODE
+        IF ls_upload_data-value EQ text-033. "VENDOR CODE              sample checking for valid Excel. 
           DATA(lv_tabix) = 8.
         ELSE.
           MESSAGE text-021 TYPE c_e.
