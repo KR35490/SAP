@@ -27,7 +27,7 @@
         upload_ole              = 2
         OTHERS                  = 3.
     IF sy-subrc NE  0.
-      MESSAGE text-021 TYPE c_e.
+     * Error Message Here
     ELSE.
       CLEAR ls_upload_data.
       ls_upload_data = lt_upload_data[ 2 ].
