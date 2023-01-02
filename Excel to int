@@ -1,0 +1,83 @@
+   DATA : lt_upload_data     TYPE STANDARD TABLE OF alsmex_tabline,
+           ls_upload_data     TYPE alsmex_tabline,
+           ls_upload_data_tmp TYPE alsmex_tabline,
+           lv_col(4)          TYPE n,
+           lv_flag            TYPE c,
+           lv_row             TYPE numc4.
+    CONSTANTS: c_001 TYPE numc4 VALUE '0001',
+               c_002 TYPE numc4 VALUE '0002',
+               c_003 TYPE numc4 VALUE '0003',
+               c_004 TYPE numc4 VALUE '0004',
+               c_005 TYPE numc4 VALUE '0005',
+               c_006 TYPE numc4 VALUE '0006'.
+
+    CLEAR:ls_upload_data, lt_upload_data[].
+*C-- Uploading the data in the file into internal table
+    CALL FUNCTION 'ALSM_EXCEL_TO_INTERNAL_TABLE'
+      EXPORTING
+        filename                = p_file
+        i_begin_col             = 1
+        i_begin_row             = 1
+        i_end_col               = c_10i
+        i_end_row               = c_10000
+      TABLES
+        intern                  = lt_upload_data
+      EXCEPTIONS
+        inconsistent_parameters = 1
+        upload_ole              = 2
+        OTHERS                  = 3.
+    IF sy-subrc NE  0.
+      MESSAGE text-021 TYPE c_e.
+    ELSE.
+      CLEAR ls_upload_data.
+      ls_upload_data = lt_upload_data[ 2 ].
+      IF ls_upload_data IS NOT INITIAL.
+        ls_upload_data-value = to_upper( ls_upload_data-value ).
+        IF ls_upload_data-value EQ text-033. "VENDOR CODE
+          DATA(lv_tabix) = 8.
+        ELSE.
+          MESSAGE text-021 TYPE c_e.
+          LEAVE LIST-PROCESSING.
+        ENDIF.
+      ENDIF.
+      SORT lt_upload_data BY row col.
+      CLEAR: lv_flag,
+            lv_row.
+
+      LOOP AT lt_upload_data INTO ls_upload_data FROM lv_tabix.
+        CLEAR lv_col.
+        IF lv_row NE ls_upload_data-row.
+          CLEAR: lv_row,
+                 lv_flag.
+          lv_row = ls_upload_data-row.
+        ENDIF.
+
+        IF lv_flag EQ abap_false.
+          APPEND INITIAL LINE TO lt_upload ASSIGNING FIELD-SYMBOL(<fs_upload>).
+        ENDIF.
+        DO 6 TIMES.
+          lv_flag = abap_true.
+          lv_col = lv_col + 1.
+          CLEAR ls_upload_data_tmp.
+          ls_upload_data_tmp = VALUE #( lt_upload_data[ row = ls_upload_data-row
+                                                col = lv_col ] OPTIONAL ).
+          IF ls_upload_data_tmp IS NOT INITIAL.
+            <fs_upload>-row = ls_upload_data_tmp-row.
+            CASE ls_upload_data_tmp-col.
+              WHEN c_001.
+                <fs_upload>-lifnr  = ls_upload_data_tmp-value.
+              WHEN c_002.
+                <fs_upload>-werks  = ls_upload_data_tmp-value.
+              WHEN c_003.
+                <fs_upload>-matnr  = ls_upload_data_tmp-value.
+              WHEN c_004.
+                <fs_upload>-ltc    = ls_upload_data_tmp-value.
+              WHEN c_005.
+                <fs_upload>-mmlt   = ls_upload_data_tmp-value.
+              WHEN c_006.
+                <fs_upload>-conlt  = ls_upload_data_tmp-value.
+            ENDCASE.
+          ENDIF.
+        ENDDO.
+      ENDLOOP.
+    ENDIF.
