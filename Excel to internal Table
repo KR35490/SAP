@@ -1,3 +1,5 @@
+#Small   
+   
    DATA : lt_upload_data     TYPE STANDARD TABLE OF alsmex_tabline,
            ls_upload_data     TYPE alsmex_tabline,
            ls_upload_data_tmp TYPE alsmex_tabline,
