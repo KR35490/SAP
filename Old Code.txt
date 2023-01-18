@@ -1,0 +1,68 @@
+FORM get_key_date_week_details .
+
+  CLEAR v_day.
+  CALL FUNCTION 'DATE_TO_DAY'
+    EXPORTING
+      date    = p_date
+    IMPORTING
+      weekday = v_day.
+
+  CLEAR:v_i_start,v_i_end.
+  CASE v_day.
+    WHEN 'Sunday'.
+      v_i_start = 0.
+      v_i_end   = 6.
+      PERFORM get_week_start_end_date USING    v_i_start
+                                               v_i_end
+                                      CHANGING v_ws_date
+                                               v_we_date.
+    WHEN 'Monday'.
+      v_i_start = 1.
+      v_i_end   = 5.
+      PERFORM get_week_start_end_date USING    v_i_start
+                                               v_i_end
+                                      CHANGING v_ws_date
+                                               v_we_date.
+    WHEN 'Tuesday'.
+      v_i_start = 2.
+      v_i_end   = 4.
+      PERFORM get_week_start_end_date USING    v_i_start
+                                               v_i_end
+                                      CHANGING v_ws_date
+                                               v_we_date.
+    WHEN 'Wed.'.
+      v_i_start = 3.
+      v_i_end   = 3.
+      PERFORM get_week_start_end_date USING    v_i_start
+                                               v_i_end
+                                      CHANGING v_ws_date
+                                               v_we_date.
+    WHEN 'Thursday'.
+      v_i_start = 4.
+      v_i_end   = 2.
+      PERFORM get_week_start_end_date USING    v_i_start
+                                               v_i_end
+                                      CHANGING v_ws_date
+                                               v_we_date.
+    WHEN 'Friday'.
+      v_i_start = 5.
+      v_i_end   = 1.
+      PERFORM get_week_start_end_date USING    v_i_start
+                                               v_i_end
+                                      CHANGING v_ws_date
+                                               v_we_date.
+    WHEN 'Sat.'.
+      v_i_start = 6.
+      v_i_end   = 0.
+      PERFORM get_week_start_end_date USING    v_i_start
+                                               v_i_end
+                                      CHANGING v_ws_date
+                                               v_we_date.
+    WHEN OTHERS.
+  ENDCASE.
+
+  CLEAR :v_init_s_date,v_init_e_date.
+  v_init_s_date = v_ws_date.
+  v_init_e_date = v_we_date.
+
+ENDFORM.
