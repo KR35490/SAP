@@ -1,4 +1,3 @@
-REPORT zutil_new_syntax LINE-COUNT 255.
 *----------------------------------------------------------------------*
 * Reference utility Report for the new inline Declarations,
 * Skip and Write statements are used to format and Display the Output.
