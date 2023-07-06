@@ -1,1 +1,594 @@
+REPORT zutil_new_syntax LINE-COUNT 255.
+*----------------------------------------------------------------------*
+* Reference utility Report for the new inline Declarations,
+* Skip and Write statements are used to format and Display the Output.
+*----------------------------------------------------------------------*
 
+* Structure Declarations
+TYPES: BEGIN OF ty_vbap,
+         vbeln TYPE vbeln_va,
+         posnr TYPE posnr_va,
+         matnr TYPE matnr,
+       END OF ty_vbap.
+* Constants Declarations
+CONSTANTS: c_hw  TYPE char9    VALUE 'HONEYWELL',
+           c_old TYPE char11   VALUE 'Old Syntax:',
+           c_new TYPE char11   VALUE 'New Syntax:'.
+
+*----------------------------------------------------------------------*
+* Variable Declarations Old Vs New
+*----------------------------------------------------------------------*
+" Old Syntax
+DATA lv_var1 TYPE char9.
+CLEAR lv_var1.
+lv_var1 = c_hw.                                              "Old syntax
+WRITE:/ text-001 COLOR 6 INVERSE.
+WRITE:/ c_old COLOR 5 INVERSE, lv_var1 COLOR 7 INVERSE .
+
+" New Syntax
+DATA(lv_var2) = c_hw.                                        "New syntax
+WRITE:/ c_new COLOR 7 INVERSE, lv_var2 COLOR 5 INVERSE.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+* Select Query  Old Vs New
+*----------------------------------------------------------------------*
+"Old Syntax
+TYPES: BEGIN OF ty_likp,
+         vbeln TYPE	vbeln_vl,
+         ernam TYPE ernam,
+         erzet TYPE erzet,
+         erdat TYPE erdat,
+       END OF ty_likp.
+
+DATA: ls_likp  TYPE ty_likp,
+      lv_vbeln TYPE vbeln_vl VALUE '8000002302'.
+CLEAR ls_likp.
+SELECT SINGLE vbeln
+              ernam
+              erzet
+              erdat
+  FROM likp
+  INTO ls_likp
+  WHERE vbeln EQ lv_vbeln.
+IF sy-subrc EQ 0.
+  SKIP.
+  WRITE:/ text-002 COLOR 6 INVERSE.
+  FORMAT COLOR 7 INVERSE ON.
+  WRITE:/ c_old COLOR 5 INTENSIFIED, ls_likp-vbeln, ls_likp-ernam,
+        ls_likp-erzet, ls_likp-erdat.
+  FORMAT COLOR OFF.
+  CLEAR ls_likp.
+ENDIF.
+*cl_demo_output=>display( ls_likp ).
+
+" New Syntax
+SELECT SINGLE vbeln,
+              ernam,
+              erzet,
+              erdat
+  FROM likp
+  INTO @DATA(ls_likp1)
+  WHERE vbeln EQ @lv_vbeln.
+IF sy-subrc EQ 0.
+  FORMAT COLOR 5 INVERSE ON.
+  WRITE:/ c_new COLOR 7 INTENSIFIED, ls_likp1-vbeln, ls_likp1-ernam,
+        ls_likp1-erzet, ls_likp1-erdat.
+  FORMAT COLOR OFF.
+  CLEAR ls_likp.
+ENDIF.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+* CONVERSION EXIT ALPHA INPUT  Old Vs New
+*----------------------------------------------------------------------*
+" Old Syntax
+DATA lv_value TYPE char10 VALUE '22450'.
+CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'                  "Old Syntax
+  EXPORTING
+    input  = lv_value
+  IMPORTING
+    output = lv_value.
+SKIP.
+WRITE:/ text-003 COLOR 6.
+WRITE :/ c_old COLOR 5 INTENSIFIED, lv_value COLOR 7 INVERSE.
+CLEAR lv_value.
+" New Syntax
+DATA lv_value1 TYPE char10 VALUE '22450'.
+lv_value1 = |{ lv_value1 ALPHA = IN }|.                      "New syntax
+WRITE:/ c_new COLOR 7 INTENSIFIED , lv_value1 COLOR 5 INVERSE.
+CLEAR lv_value1.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+* CONVERSION EXIT ALPHA OUTPUT  Old Vs New
+*----------------------------------------------------------------------*
+" Old Syntax
+DATA lv_value_out TYPE char10 VALUE '0000022450'.
+CALL FUNCTION 'CONVERSION_EXIT_ALPHA_OUTPUT'                 "Old Synatx
+  EXPORTING
+    input  = lv_value_out
+  IMPORTING
+    output = lv_value_out.
+SKIP.
+WRITE:/ text-004 COLOR 6.
+WRITE :/ c_old COLOR 5 INTENSIFIED, lv_value_out COLOR 7 INVERSE.
+CLEAR lv_value_out.
+" New Syntax
+DATA lv_value1_out TYPE char10 VALUE '0000022450'.
+lv_value1_out = |{ lv_value1_out ALPHA = OUT }|.             "New syntax
+WRITE:/ c_new COLOR 7 INTENSIFIED , lv_value1_out COLOR 5 INVERSE.
+CLEAR lv_value1_out.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+* WA declaration in Read Table and Loop    Old Vs New
+*----------------------------------------------------------------------*
+DATA: lv_salesorder TYPE vbeln_va VALUE '0000039187'.
+*      lv_date       TYPE sy-datum VALUE '20220411'.
+
+SELECT vbeln,
+       posnr,
+       matnr
+  FROM vbap
+  INTO TABLE @DATA(lt_vbap)
+  WHERE vbeln EQ @lv_salesorder.
+IF sy-subrc EQ 0.
+  SORT lt_vbap BY vbeln.
+  "Old Syntax
+  DATA ls_vbap TYPE ty_vbap.
+  CLEAR ls_vbap.
+  SKIP.
+  WRITE:/ text-007  COLOR 6 INVERSE.
+  READ TABLE lt_vbap INTO ls_vbap WITH KEY vbeln = lv_salesorder
+                                           BINARY SEARCH.
+  IF sy-subrc EQ 0.
+    WRITE:/ c_old COLOR 5 INVERSE, / text-005,
+          / ls_vbap-vbeln, ls_vbap-posnr, ls_vbap-matnr.
+    CLEAR ls_vbap.
+  ENDIF.
+  CLEAR ls_vbap.
+  WRITE: / text-006.
+  DATA ls_vbap1 TYPE ty_vbap.
+  CLEAR ls_vbap1.
+  LOOP AT lt_vbap INTO ls_vbap1.
+    WRITE:/ ls_vbap1-vbeln, ls_vbap1-posnr, ls_vbap1-matnr.
+    CLEAR ls_vbap1.
+  ENDLOOP.
+  " New syntax
+  READ TABLE lt_vbap INTO DATA(ls_vbap_new) WITH KEY vbeln = lv_salesorder
+                                            BINARY SEARCH.
+  IF sy-subrc EQ 0.
+    WRITE:/ c_new COLOR 7 INVERSE, / text-005,
+      / ls_vbap_new-vbeln, ls_vbap_new-posnr, ls_vbap_new-matnr.
+    CLEAR ls_vbap_new.
+  ENDIF.
+  CLEAR ls_vbap.
+  WRITE:/ text-006.
+  LOOP AT lt_vbap INTO DATA(ls_vbap1_new).
+    WRITE:/ ls_vbap1_new-vbeln, ls_vbap1_new-posnr, ls_vbap1_new-matnr.
+    CLEAR ls_vbap1_new.
+  ENDLOOP.
+ENDIF.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+* Moving one table data to other.      Old Vs New
+*----------------------------------------------------------------------*
+"Old Syntax
+DATA lt_vbap_temp LIKE lt_vbap.
+lt_vbap_temp = lt_vbap.                                      "Old Syntax
+SKIP.
+WRITE:/ text-008 COLOR 6 INVERSE, / c_old COLOR 5 INVERSE, / text-006.
+LOOP AT lt_vbap_temp INTO DATA(ls_vbap_old).
+  WRITE:/ ls_vbap_old-vbeln, ls_vbap_old-posnr, ls_vbap_old-matnr.
+  CLEAR ls_vbap_old.
+ENDLOOP.
+"New Syntax
+DATA(lt_vbap1_temp) = lt_vbap.                               "New syntax
+WRITE:/ c_new COLOR 7 INVERSE, / text-006.
+LOOP AT lt_vbap1_temp INTO ls_vbap_old.
+  WRITE:/ ls_vbap_old-vbeln, ls_vbap_old-posnr, ls_vbap_old-matnr.
+  CLEAR ls_vbap_old.
+ENDLOOP.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+* Counting the Number of Lines from the Table.     Old Vs New
+*----------------------------------------------------------------------*
+SKIP.
+WRITE:/ text-009 COLOR 6 INVERSE.
+"Old Syntax
+DATA lv_cnt TYPE i.
+CLEAR lv_cnt.
+DESCRIBE TABLE lt_vbap LINES lv_cnt.                         "Old Syntax
+WRITE:/ c_old COLOR 5, lv_cnt.
+CLEAR lv_cnt.
+"New Syntax
+DATA(lv_cnt_new) = lines( lt_vbap ).                         "New Syntax
+WRITE:/ c_new COLOR 7, lv_cnt_new.
+CLEAR lv_cnt_new.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+* Concatenate                     Old Vs New
+*----------------------------------------------------------------------*
+SKIP.
+WRITE: / text-010 COLOR 6 INVERSE..
+"Old Syntax
+DATA lv_old TYPE char17.
+CONCATENATE text-011 text-012 INTO lv_old SEPARATED BY space."Old Syntax
+
+WRITE:/ c_old COLOR 5 INVERSE, lv_old.
+
+"New syntax
+DATA(lv_new) = |{ text-011 } { text-012 }|.                  "New Syntax
+WRITE:/ c_new COLOR 7 INVERSE, lv_new.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+* Object Creation for class.      Old Vs New
+*----------------------------------------------------------------------*
+CLASS lcl_sample DEFINITION FINAL.
+  PUBLIC SECTION.
+    METHODS display.
+ENDCLASS.
+CLASS lcl_sample IMPLEMENTATION.
+  METHOD display.
+    WRITE:/ text-013.
+  ENDMETHOD.
+ENDCLASS.
+
+"Old Syntax.
+DATA lo_sample TYPE REF TO lcl_sample.
+
+START-OF-SELECTION.
+  SKIP.
+  WRITE:/ text-014 COLOR 6 INVERSE.
+  WRITE:/ c_old COLOR 5 INVERSE.
+  IF lo_sample IS NOT BOUND.
+    CREATE OBJECT lo_sample.                                 "Old Syntax
+  ENDIF.
+  IF lo_sample IS BOUND.
+    CALL METHOD lo_sample->display.
+    FREE lo_sample.
+  ENDIF.
+  WRITE:/ c_new COLOR 7 INVERSE.
+  "New Syntax.
+  DATA(lo_sample_new) = NEW lcl_sample( ).                   "New Syntax
+  IF lo_sample_new IS BOUND.
+    CALL METHOD lo_sample_new->display.
+    FREE lo_sample_new.
+  ENDIF.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+* Inserting or Appending values to the WA and Internal table.
+*----------------------------------------------------------------------*
+
+  TYPES: BEGIN OF ty_test1,
+           hid    TYPE char7,
+           name   TYPE char30,
+           mailid TYPE char40,
+         END OF ty_test1,
+
+         BEGIN OF ty_test2,
+           name   TYPE char30,
+           mailid TYPE char40,
+         END OF ty_test2.
+  " Old Syntax
+  DATA: lt_test1 TYPE STANDARD TABLE OF ty_test1,
+        lt_test2 TYPE STANDARD TABLE OF ty_test2,
+        ls_test1 TYPE ty_test1,
+        ls_test2 TYPE ty_test2.
+
+  ls_test1-hid  = text-016.
+  ls_test1-name = text-017.
+  ls_test1-mailid = text-018.
+  APPEND ls_test1 TO lt_test1.                               "Old Syntax
+  CLEAR ls_test1.
+
+  ls_test1-hid  = text-019.
+  ls_test1-name = text-020.
+  ls_test1-mailid = text-021.
+  APPEND ls_test1 TO lt_test1.
+  CLEAR ls_test1.
+
+  ls_test1-name = text-022.
+  APPEND ls_test1 TO lt_test1.
+  CLEAR ls_test1.
+  ls_test1-name = text-023.
+  APPEND ls_test1 TO lt_test1.
+  CLEAR ls_test1.
+  SKIP.
+  WRITE:/ text-015 COLOR 6 INVERSE.
+  WRITE:/ c_old COLOR 5 INVERSE.
+  LOOP AT lt_test1 INTO ls_test1.
+    WRITE:/ ls_test1-hid, ls_test1-name, ls_test1-mailid.
+    CLEAR ls_test1.
+  ENDLOOP.
+
+  "New Syntax
+  DATA lt_test TYPE STANDARD TABLE OF ty_test1.
+  lt_test = VALUE #( ( hid = text-016 name = text-017 mailid = text-018 ) "New Syntax
+  ( hid = text-019 name = text-020 mailid = text-021 )
+  ( name = text-022 ) ( name = text-023 ) ).
+
+  WRITE:/ c_new COLOR 7 INVERSE.
+  LOOP AT lt_test INTO DATA(ls_test).
+    WRITE:/ ls_test-hid, ls_test-name, ls_test-mailid.
+    CLEAR ls_test.
+  ENDLOOP.
+
+  SKIP.
+  WRITE:/ text-025 COLOR 6 INVERSE.
+  APPEND VALUE #( name = text-024 ) TO lt_test.              "New Synatx
+  WRITE:/ c_new COLOR 7 INVERSE.
+  LOOP AT lt_test INTO ls_test.
+    WRITE:/ ls_test-hid, ls_test-name, ls_test-mailid.
+    CLEAR ls_test.
+  ENDLOOP.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+* Move Corresponding.            Old Vs New
+*----------------------------------------------------------------------*
+
+  lt_test2 = VALUE #( ( name = text-026 mailid = text-027 ) ).
+  DATA(lt_test_temp) = lt_test1.
+  MOVE-CORRESPONDING lt_test2 TO lt_test_temp.               "Old Syntax
+  SKIP.
+  WRITE:/ text-028 COLOR 6 INVERSE, / c_old COLOR 5 INVERSE.
+  LOOP AT lt_test_temp INTO ls_test1.
+    WRITE:/ ls_test1-hid, ls_test1-name, ls_test1-mailid.
+    CLEAR ls_test1.
+  ENDLOOP.
+  CLEAR lt_test_temp.
+
+  lt_test_temp = CORRESPONDING #(  lt_test2  ).              "New Syntax
+  WRITE:/ c_new COLOR 7 INVERSE.
+  LOOP AT lt_test_temp INTO ls_test1.
+    WRITE:/ ls_test1-hid, ls_test1-name, ls_test1-mailid.
+    CLEAR ls_test1.
+  ENDLOOP.
+  CLEAR lt_test_temp.
+
+  lt_test1 = CORRESPONDING #( BASE ( lt_test1 ) lt_test2 ).  "New Syntax
+  WRITE:/ c_new COLOR 7 INVERSE, text-029 COLOR 6 INVERSE.
+  LOOP AT lt_test1 INTO ls_test1.
+    WRITE:/ ls_test1-hid, ls_test1-name, ls_test1-mailid.
+    CLEAR ls_test1.
+  ENDLOOP.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+* IF and IF Else Conditions     COND #()     Old Vs New
+*----------------------------------------------------------------------*
+* IF condition.
+  SKIP.
+  WRITE:/ text-030 COLOR 6 INVERSE.
+  DATA(lv_hid) = c_hw.
+  DATA: fl_set_old TYPE flag.
+  " Old Syntax.
+  IF lv_hid EQ c_hw.                            "Old Syntax
+    fl_set_old = abap_true.
+  ENDIF.
+  WRITE:/ c_old COLOR 5 INVERSE, fl_set_old.
+  " New syntax
+  DATA(fl_set_new) = COND #( WHEN lv_hid EQ c_hw THEN abap_true ). "New Syntax
+  WRITE:/ c_new COLOR 7 INVERSE, fl_set_new.
+  CLEAR: fl_set_old, fl_set_new.
+
+* IF Else Conditions
+  SKIP.
+  WRITE:/ text-031 COLOR 6 INVERSE.
+  " Old syntax
+  IF lv_hid = c_hw.                             "Old Syntax
+    fl_set_old = abap_true.
+  ELSE.
+    fl_set_old = space.
+  ENDIF.
+
+  WRITE:/ c_old COLOR 5 INVERSE, fl_set_old.
+  " New Syntax
+  fl_set_new = COND #( WHEN lv_hid EQ c_hw THEN abap_true ELSE space ). "New Syntax
+  WRITE:/ c_new COLOR 7 INVERSE, fl_set_new.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+* Case statement                      Old Vs New
+*----------------------------------------------------------------------*
+  SKIP.
+  WRITE:/ text-032 COLOR 6 INVERSE.
+  DATA fl_set TYPE flag.
+  " Old Syntax
+  CASE fl_set_old.                                    "Old Syntax
+    WHEN abap_true.
+      fl_set = abap_true.
+    WHEN space.
+      fl_set = space.
+  ENDCASE.
+  WRITE:/ c_old COLOR 5 INVERSE, fl_set.
+  "New syntax
+  fl_set = SWITCH #( fl_set_new                        "New Syntax
+                     WHEN abap_true THEN abap_true
+                     WHEN space THEN space ).
+  WRITE: / c_new COLOR 7 INVERSE, fl_set.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+* Read with Index.                    Old Vs New
+*----------------------------------------------------------------------*
+
+  DATA: lt_tst TYPE STANDARD TABLE OF ty_test1,
+        ls_tst TYPE ty_test1.
+
+  lt_tst = VALUE #( ( hid = text-016 name = text-017 )
+                    ( hid = text-019 name = text-020 ) ).
+
+  SKIP.
+  WRITE:/ text-033 COLOR 6 INVERSE.
+  " Old syntax.
+  READ TABLE lt_tst INTO ls_tst INDEX 1.    " Old Syntax
+  IF sy-subrc EQ 0.
+    WRITE:/ c_old COLOR 5 INVERSE, ls_tst-hid, ls_tst-name.
+    CLEAR ls_tst.
+  ENDIF.
+
+  " New Syntax.
+  IF lt_tst IS NOT INITIAL.
+    DATA(ls_tst_new) = lt_tst[ 1 ].           " New Syntax
+    IF ls_tst_new IS NOT INITIAL.
+      WRITE:/ c_new COLOR 7 INVERSE, ls_tst-hid, ls_tst-name.
+      CLEAR ls_tst.
+    ENDIF.
+  ENDIF.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+* Read with Transporting No Fields.      Old Vs New
+*----------------------------------------------------------------------*
+  SKIP.
+  WRITE:/ text-034 COLOR 6 INVERSE.
+  " Old Syntax.
+  READ TABLE lt_tst TRANSPORTING NO FIELDS WITH KEY hid = text-019  " Old Syntax
+                                                    name = text-020.
+  IF sy-subrc EQ 0. "Note: If sy-subrc ne 0 here then use the IF not line exists.
+    WRITE:/ c_old COLOR 5 INVERSE, text-035.
+  ENDIF.
+
+  " New Syntax.
+  IF line_exists( lt_tst[ hid = text-019 name = text-020 ] ).   " New syntax
+    WRITE:/ c_new COLOR 7 INVERSE, text-035..
+  ENDIF.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+* Read Table                  Old Vs New
+*----------------------------------------------------------------------*
+  SKIP.
+  WRITE:/ text-036 COLOR 6 INVERSE.
+
+  " Old syntax.
+  CLEAR ls_tst.
+  READ TABLE lt_tst INTO ls_tst WITH KEY hid = text-016      " Old Syntax
+                                         name = text-017.
+  IF sy-subrc EQ 0.
+    WRITE:/ c_old COLOR 5 INVERSE, ls_tst-hid, ls_tst-name.
+    CLEAR ls_tst.
+  ENDIF.
+
+  "New syntax.
+* Try Catch block addition to avoid the runtime dumps in case of record not exists
+  WRITE:/ text-037 COLOR 6 INVERSE.
+  TRY.
+      DATA(ls_tst_n) = lt_tst[ hid = text-016 name = text-017 ].  " New Syntax
+      IF ls_tst_n IS NOT INITIAL.
+        WRITE:/ c_new COLOR 7 INVERSE, ls_tst_n-hid, ls_tst_n-name.
+        CLEAR ls_tst_n.
+      ENDIF.
+    CATCH cx_sy_itab_line_not_found. " Catch the error message here.
+  ENDTRY.
+
+  " OR
+*Value # ( .. Optional) addition to avoid the runtime dumps in case of record not exists
+  WRITE:/ text-038 COLOR 6 INVERSE.
+  ls_tst_n = VALUE #( lt_tst[ hid = text-016 name = text-017 ] OPTIONAL ). " New Syntax
+  IF ls_tst_n IS NOT INITIAL.
+    WRITE:/ c_new COLOR 7 INVERSE, ls_tst_n-hid, ls_tst_n-name.
+    CLEAR ls_tst_n.
+  ENDIF.
+*----------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+*Looping internal table.     Old Vs New
+*----------------------------------------------------------------------*
+  SKIP.
+  WRITE:/ text-039 COLOR 6 INVERSE.
+  DATA lt_tst_l TYPE STANDARD TABLE OF ty_test1.
+  " Old Syntax
+  CLEAR: ls_tst, ls_tst_n, lt_tst_l.
+  LOOP AT lt_tst INTO ls_tst.                          " Old Syntax
+    ls_tst_n = ls_tst-hid.
+    APPEND ls_tst_n TO lt_tst_l.
+    CLEAR: ls_tst, ls_tst_n.
+  ENDLOOP.
+  IF lt_tst_l IS NOT INITIAL.
+    WRITE:/ c_old COLOR 5 INVERSE, abap_true.
+  ENDIF.
+
+  " New syntax
+  CLEAR lt_tst_l.
+  lt_tst_l = VALUE #( FOR <fs_s> IN lt_tst ( hid = <fs_s>-hid ) ). " New syntax for Loop.
+
+  IF lt_tst_l IS NOT INITIAL.
+    WRITE:/ c_new COLOR 7 INVERSE, abap_true.
+  ENDIF.
+*----------------------------------------------------------------------*
+*Existing code lines from YCA_DWDM copied below.
+** Types declaration
+TYPES: BEGIN OF ty_mara,
+             matnr TYPE matnr,
+             ersda TYPE ersda,
+             ernam TYPE ernam,
+             laeda TYPE laeda,
+             aenam TYPE aenam,
+             vpsta TYPE vpsta,
+             pstat TYPE pstat_d,
+             lvorm TYPE lvoma,
+             mtart TYPE mtart,
+           END OF ty_mara.
+
+*********Data statement**********
+** Before 7.40
+DATA :lv_text TYPE string. lv_text = `ABC`.
+
+** With 7.40
+DATA(lv_newtext) = `ABC`.
+
+*********Loop at into work area *********
+** Before 7.40
+data gt_itab TYPE STANDARD TABLE OF ty_mara.
+DATA wa_itab like LINE OF gt_itab.
+LOOP AT gt_itab INTO wa_itab.
+
+ENDLOOP.
+
+** With 7.40
+LOOP AT gt_itab INTO DATA(wa_newitab).
+
+ ENDLOOP.
+
+
+*********Call method**********
+** Before 7.40
+ DATA: lo_table TYPE REF TO cl_salv_table.
+ cl_salv_table=>factory( IMPORTING r_salv_table = lo_table
+                              CHANGING t_table = gt_itab ).
+
+** With 7.0
+ cl_salv_table=>factory( IMPORTING r_salv_table = data(lo_newtable)
+                              CHANGING t_table = gt_itab ).
+
+*********Loop at assigning**********
+** Before 7.40
+ FIELD-SYMBOLS: <fs_mara> type ty_mara.
+ LOOP AT gt_itab ASSIGNING <fs_mara>.
+
+ ENDLOOP.
+
+
+** With 7.40
+ LOOP AT gt_itab ASSIGNING FIELD-SYMBOL(<fs_newmara>).
+
+ ENDLOOP.
+
+
+*********Read assigning**********
+** Before 7.40
+FIELD-SYMBOLS: <fs_mara1> type ty_mara.
+READ TABLE gt_itab ASSIGNING <fs_mara1> with KEY matnr = '123'.
+
+
+** With 7.40
+READ TABLE gt_itab ASSIGNING FIELD-SYMBOL(<fs_newmara1>) with KEY matnr = '123'.
