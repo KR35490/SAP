@@ -1,15 +1,16 @@
 Local file Upload Functionality in SAP.
 How to download Excel file with XLSX.
 
-
-*C--Parameters ****************************************************************************
+****************************************************************************************************************
+*C--Parameters
 PARAMETERS: p_dfile TYPE localfile.
 
-*C--Get F4 Value request. *****************************************************************
+****************************************************************************************************************
+*C--Get F4 Value request. 
 AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_dfile.
 
-
-*C-- File open dialog *****************************************************************
+****************************************************************************************************************
+*C-- File open dialog 
 
     DATA: lt_file_table TYPE filetable,
           ls_file_table TYPE file_table,
