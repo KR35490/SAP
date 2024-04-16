@@ -1,0 +1,47 @@
+Local file Upload Functionality in SAP.
+How to download Excel file with XLSX.
+
+
+*C--Parameters ****************************************************************************
+PARAMETERS: p_dfile TYPE localfile.
+
+*C--Get F4 Value request. *****************************************************************
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_dfile.
+
+
+*C-- File open dialog *****************************************************************
+
+    DATA: lt_file_table TYPE filetable,
+          ls_file_table TYPE file_table,
+          lv_rc         TYPE i,
+          lv_extension  TYPE string,
+          lv_filter     TYPE string.
+
+    lv_extension = c_xls.
+    lv_filter    = text-015.   "Excel File(*.XLS;*.XLSX;*.XLSM)|*.XLS;*.XLSX;*.XLSM
+
+    CALL METHOD cl_gui_frontend_services=>file_open_dialog
+      EXPORTING
+        default_extension       = lv_extension
+        file_filter             = lv_filter
+      CHANGING
+        file_table              = lt_file_table
+        rc                      = lv_rc
+      EXCEPTIONS
+        file_open_dialog_failed = 1
+        cntl_error              = 2
+        error_no_gui            = 3
+        not_supported_by_gui    = 4
+        OTHERS                  = 5.
+    IF sy-subrc IS INITIAL.
+      READ TABLE lt_file_table INTO ls_file_table INDEX 1.
+      IF sy-subrc = 0.
+        me_file = ls_file_table-filename.
+      ENDIF.
+    ELSE.
+      MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+               WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+    ENDIF.
+
+
+
