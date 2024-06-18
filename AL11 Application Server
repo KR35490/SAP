@@ -1,0 +1,28 @@
+Class Method:
+
+Step 1: T.Code: FILE
+        Creat a logiccal file path.
+
+Step 2: FM used to fetch the defined logical path.
+
+
+
+  CALL FUNCTION 'FILE_GET_NAME_USING_PATH'
+    EXPORTING
+      client                     = sy-mandt
+      logical_path               = c_z_logical path " C-- Logical path is passing here.
+      file_name                  = lv_file_name     " C-- File name passing here. 
+    IMPORTING
+      file_name_with_path        = lv_file_path   "C-- Directory file path with file name fetched here.
+    EXCEPTIONS
+      path_not_found             = 1
+      missing_parameter          = 2
+      operating_system_not_found = 3
+      file_system_not_found      = 4
+      OTHERS                     = 5.
+
+  IF sy-subrc EQ 0.
+ your logic with additon with hash
+ endif. 
+
+
