@@ -1,6 +1,17 @@
 Way to Find a Function Module Exit:
 
-
 1. Put a Break-point on the statement CALL CUSTOMER-FUNCTION.
 2. Put the package name in SMOD transaction code (Utilities - find - package name )
 3. Go to transaction code - SE84(enhancement - Customber exit) 
+
+===================================================================================================================
+
+Step to Implement a Function Module Exit:
+
+1. Go to the transaction - CMOD. 
+2. Provide a project name and click create
+3. Click on enhancemet assignment tab and provide the customer exist name. 
+4. Click on components tab - it shows the variable function module exits available.
+5. Double click on required function exit which navigate to function module. 
+6. Write the logic in the Z include of that function module. 
+7. Activate the project.
