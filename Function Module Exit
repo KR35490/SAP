@@ -15,3 +15,17 @@ Step to Implement a Function Module Exit:
 5. Double click on required function exit which navigate to function module. 
 6. Write the logic in the Z include of that function module. 
 7. Activate the project.
+
+===================================================================================================================
+
+Components: 
+
+Function Exits - Function Module Exit.
+Function Code  - Menu Exit. 
+Dynpro Areas   - Screen Exit.
+
+
+
+
+
+
