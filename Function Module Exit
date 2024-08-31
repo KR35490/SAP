@@ -1,0 +1,6 @@
+Way to Find a Function Module Exit:
+
+
+1. Put a Break-point on the statement CALL CUSTOMER-FUNCTION.
+2. Put the package name in SMOD transaction code (Utilities - find - package name )
+3. Go to transaction code - SE84(enhancement - Customber exit) 
