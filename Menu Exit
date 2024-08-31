@@ -1,0 +1,5 @@
+Menu Exit. 
+
+1. Menu Exit Allows us to add menu item to the menu of SAP program
+2. These menu items have function code that begin with "+" ( a plus sign )
+3. We can perform customber specific functionalities on these menu items. 
