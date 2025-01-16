@@ -1,6 +1,6 @@
 Important Point : One customer Exit can only be assigned to one project at a time. 
 
-SMOD   - Transactin code to find customber exit. 
+SMOD   - Transaction code to find customer exit. 
 CMOD   - Transaction code implement a customer exit
 MODSAP - Table to find a customber exit.  ( Using FM to find Exit name ) 
 MODACT - Table to find project for a customber exist.  ( Using Exit name to check if it used already ) 
